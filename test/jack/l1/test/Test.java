@@ -1,4 +1,4 @@
-package jack.l1.main;
+package jack.l1.test;
 
 import jack.l1.L1Lexer;
 import jack.l1.L1Parser;
@@ -13,10 +13,11 @@ import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 
-public class Main {
+public class Test {
 
 	public static void main(String[] args) throws IOException {
-		String file = "D:\\f.txt";
+
+		String file = "etc/proc.script";
 		InputStream is = new FileInputStream(new File(file));
 		ANTLRInputStream charInput = new ANTLRInputStream(is);
 		L1Lexer l1lexer = new L1Lexer(charInput);
@@ -26,5 +27,4 @@ public class Main {
 		IdentityInterpreter itp = new IdentityInterpreter(System.out,System.err);
 		itp.visit(tree);
 	}
-
 }

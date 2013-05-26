@@ -10,6 +10,7 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 import jack.l1.L1BaseVisitor;
 import jack.l1.L1Parser;
 import jack.l1.L1Parser.EContext;
+import jack.l1.L1Parser.LandContext;
 import jack.l1.L1Parser.LarraydefContext;
 import jack.l1.L1Parser.LarrayvisitContext;
 import jack.l1.L1Parser.LassignstatContext;
@@ -17,12 +18,15 @@ import jack.l1.L1Parser.LblockContext;
 import jack.l1.L1Parser.LbooleannagativeContext;
 import jack.l1.L1Parser.LcallfunContext;
 import jack.l1.L1Parser.LcomaContext;
+import jack.l1.L1Parser.LconditionContext;
 import jack.l1.L1Parser.LfalseContext;
 import jack.l1.L1Parser.LfunctionContext;
 import jack.l1.L1Parser.LidContext;
+import jack.l1.L1Parser.LifstatContext;
 import jack.l1.L1Parser.LmuldivContext;
 import jack.l1.L1Parser.LnegativeContext;
 import jack.l1.L1Parser.LnumberContext;
+import jack.l1.L1Parser.LorContext;
 import jack.l1.L1Parser.LparamsvalueContext;
 import jack.l1.L1Parser.LprintContext;
 import jack.l1.L1Parser.LreturnContext;
@@ -34,10 +38,28 @@ import jack.l1.mem.ScopeManager;
 
 public class IdentityInterpreter extends L1BaseVisitor<Identity> {
 	private final ScopeManager scopes = ScopeManager.newScopeManager();
-	private final PrintStream out;
+	private final PrintStream stdOut;
+	private final PrintStream errOut;
 
-	public IdentityInterpreter(OutputStream out) {
-		this.out = new PrintStream(out);
+	public IdentityInterpreter(OutputStream stdOut, OutputStream errOut) {
+		this.stdOut = new PrintStream(stdOut);
+		this.errOut = new PrintStream(errOut);
+	}
+
+	@Override
+	public Identity visitLifstat(LifstatContext ctx) {
+		Identity condition = visit(ctx.e());
+		if (condition.getIdentityType() != Identity.BOOL) {
+			this.errOut.println(condition.getIdentityType()
+					+ " is not a condition result.");
+		}
+		Boolean b = Boolean.valueOf(condition.getConstantValue().toString());
+		if (b) {
+			visit(ctx.b(0));
+		} else {
+			visit(ctx.b(1));
+		}
+		return null;
 	}
 
 	@Override
@@ -46,7 +68,7 @@ public class IdentityInterpreter extends L1BaseVisitor<Identity> {
 		Identity right = visit(ctx.e(1));
 		if (left.getIdentityType() != Identity.NUMBER
 				|| right.getIdentityType() != Identity.NUMBER) {
-			out.println("Number is need in MUL or DIV.");
+			errOut.println("Number is need in MUL or DIV.");
 		}
 		if (ctx.op.getType() == L1Parser.MUL) {
 			Double l = Double.valueOf(left.getConstantValue().toString());
@@ -105,7 +127,7 @@ public class IdentityInterpreter extends L1BaseVisitor<Identity> {
 		Identity right = visit(ctx.e(1));
 		if (left.getIdentityType() != Identity.NUMBER
 				|| right.getIdentityType() != Identity.NUMBER) {
-			out.println("Number is need in ADD or SUB.");
+			errOut.println("Number is need in ADD or SUB.");
 		}
 		if (ctx.op.getType() == L1Parser.ADD) {
 			Double l = Double.valueOf(left.getConstantValue().toString());
@@ -130,9 +152,8 @@ public class IdentityInterpreter extends L1BaseVisitor<Identity> {
 		Identity iden = new Identity(Identity.FUN, fd);
 		boolean isNotDef = scopes.putFunction(functionName, iden);
 		if (!isNotDef) {
-			out.println("Function " + functionName
-					+ " is already defined.");
-		} 
+			errOut.println("Function " + functionName + " is already defined.");
+		}
 		Identity r = new Identity(Identity.FUN, fd);
 		return r;
 	}
@@ -148,9 +169,8 @@ public class IdentityInterpreter extends L1BaseVisitor<Identity> {
 	@Override
 	public Identity visitLbooleannagative(LbooleannagativeContext ctx) {
 		Identity br = visit(ctx.e());
-		out.println("Boolean Negative Sign:" + ctx.children.get(0));
 		if (br.getIdentityType() != Identity.BOOL) {
-			out.println("Boolean expr does not return BOOL type.");
+			errOut.println("Boolean expr does not return BOOL type.");
 		}
 		Boolean b = (Boolean) br.getConstantValue();
 		if (b == false) {
@@ -186,7 +206,7 @@ public class IdentityInterpreter extends L1BaseVisitor<Identity> {
 
 		Identity index = visit(ctx.e(1));
 		if (index.getIdentityType() != Identity.NUMBER) {
-			out.println("Index must be NUMBER.");
+			errOut.println("Index must be NUMBER.");
 		}
 		Integer rindex = Integer.valueOf(index.getConstantValue().toString());
 		Identity prefix = visit(ctx.e(0));
@@ -196,11 +216,11 @@ public class IdentityInterpreter extends L1BaseVisitor<Identity> {
 		}
 
 		if (prefix == null) {
-			out.println("Symbol " + prefix + " is not defined.");
+			errOut.println("Symbol " + prefix + " is not defined.");
 		}
 
 		if (prefix.getIdentityType() != Identity.ARRAY) {
-			out.println("Array Visitor must be array.Visitor type :"
+			errOut.println("Array Visitor must be array.Visitor type :"
 					+ prefix.getIdentityType());
 		}
 
@@ -234,20 +254,20 @@ public class IdentityInterpreter extends L1BaseVisitor<Identity> {
 		String functionName = ctx.ID().getText();
 		Identity fd = this.scopes.getFunction(functionName);
 		if (fd == null || fd.getIdentityType() != Identity.FUN) {
-			out.println("Function " + functionName + " is not defined.");
+			errOut.println("Function " + functionName + " is not defined.");
 		}
 		FunctionDef f = (FunctionDef) fd.getConstantValue();
 		String[] paras = f.getParameters();
 		Identity pv = visit(ctx.elist());
 		if (pv.getIdentityType() != Identity.PARAMETER_VALUES) {
-			out.println("Visi parameters error. Return type:"
+			errOut.println("Visi parameters error. Return type:"
 					+ pv.getIdentityType());
 		}
 
 		Identity[] pvs = (Identity[]) pv.getConstantValue();
 		if (paras.length != pvs.length) {
-			out.println("Value'lenght not equal Para's length:"
-					+ pvs.length + " " + paras.length);
+			errOut.println("Value'lenght not equal Para's length:" + pvs.length
+					+ " " + paras.length);
 		}
 
 		this.scopes.prepareForCallFunction();
@@ -268,7 +288,7 @@ public class IdentityInterpreter extends L1BaseVisitor<Identity> {
 		for (TerminalNode id : ids) {
 			if (id != null) {
 				if (id.getText() == null) {
-					out.println("Invalid id: null");
+					errOut.println("Invalid id: null");
 				}
 				ans[i] = id.getText();
 				i++;
@@ -310,9 +330,75 @@ public class IdentityInterpreter extends L1BaseVisitor<Identity> {
 					+ value.hashCode());
 		}
 
-		out.println(ans.getConstantValue().toString());
+		stdOut.println(ans.getConstantValue().toString());
 
 		return null;
+	}
+
+	@Override
+	public Identity visitLcondition(LconditionContext ctx) {
+		int opType = ctx.op.getType();
+		Identity left = visit(ctx.e(0));
+		Identity right = visit(ctx.e(1));
+
+		if (left.getIdentityType() != Identity.NUMBER
+				|| right.getIdentityType() != Identity.NUMBER) {
+			errOut.println("Condition Error: test values must be NUMBER.");
+		}
+		boolean ans = false;
+		Double l = Double.valueOf(left.getConstantValue().toString());
+		Double r = Double.valueOf(right.getConstantValue().toString());
+		switch (opType) {
+		case L1Parser.G:
+			ans = l > r;
+			break;
+		case L1Parser.GE:
+			ans = l >= r;
+			break;
+		case L1Parser.L:
+			ans = l < r;
+			break;
+		case L1Parser.LE:
+			ans = l <= r;
+			break;
+		case L1Parser.EQ:
+			ans = l == r;
+			break;
+		case L1Parser.NEQ:
+			ans = l != r;
+			break;
+		default:
+			errOut.println("Wrong op:" + ctx.op.getText());
+			break;
+		}
+
+		return new Identity(Identity.BOOL, ans);
+	}
+
+	@Override
+	public Identity visitLand(LandContext ctx) {
+		Identity left = visit(ctx.e(0));
+		Identity right = visit(ctx.e(1));
+		Boolean l = Boolean.valueOf(left.getConstantValue().toString());
+		Boolean r = Boolean.valueOf(right.getConstantValue().toString());
+		boolean ans = false;
+		if (l && r) {
+			ans = true;
+		}
+		return new Identity(Identity.BOOL, ans);
+	}
+
+	@Override
+	public Identity visitLor(LorContext ctx) {
+		Identity left = visit(ctx.e(0));
+		Identity right = visit(ctx.e(1));
+		Boolean l = Boolean.valueOf(left.getConstantValue().toString());
+		Boolean r = Boolean.valueOf(right.getConstantValue().toString());
+		boolean ans = false;
+		if (l || r) {
+			ans = true;
+		}
+		return new Identity(Identity.BOOL, ans);
 	}
 
 }

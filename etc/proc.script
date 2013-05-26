@@ -1,0 +1,22 @@
+defun fa(a,b,c){
+	a = 5;
+	return a + 1;
+}
+
+defun fb(x){
+	print x;
+	if (x > 15 && x < 30) then {
+		return 10;
+	}else {
+		return 20;
+	}
+		
+}
+
+a = 2;
+print a;
+
+c = -fa(7,8,9) * fb(16);
+print a;
+
+print c;

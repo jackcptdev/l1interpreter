@@ -46,11 +46,13 @@ e :   TRUE                                          #ltrue
      | ID '(' elist? ')'                            #lcallfun
      | '[' elist ']'                                #larraydef
      | e '[' e ']'                                 #larrayvisit
-     | ('-') e                                       #lnegative
      | '!' e                                       #lbooleannagative
-     | e op=('*' | '/') e                             #lmuldiv         
+     | e op=('*' | '/') e                             #lmuldiv 
+     | ('-') e                                       #lnegative
      | e op=('+' | '-') e                              #lsubAdd
-     | e ('!=' | '==' | '>=' | '>' | '<=' | '<' ) e #lcondition
+     | e op=('!=' | '==' | '>=' | '>' | '<=' | '<' ) e #lcondition
+     | e '&&' e                                   #land
+     | e '||' e                                     #lor
      | '(' e ')'                                    #lcoma
     ;
 

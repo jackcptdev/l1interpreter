@@ -1,11 +1,14 @@
 // Generated from L1.g4 by ANTLR 4.0
 package jack.l1;
 import org.antlr.v4.runtime.tree.*;
+import org.antlr.v4.runtime.Token;
 
 public interface L1Visitor<T> extends ParseTreeVisitor<T> {
 	T visitLcoma(L1Parser.LcomaContext ctx);
 
 	T visitLnumber(L1Parser.LnumberContext ctx);
+
+	T visitLand(L1Parser.LandContext ctx);
 
 	T visitLfunction(L1Parser.LfunctionContext ctx);
 
@@ -18,6 +21,8 @@ public interface L1Visitor<T> extends ParseTreeVisitor<T> {
 	T visitLdemaexpr(L1Parser.LdemaexprContext ctx);
 
 	T visitParameters(L1Parser.ParametersContext ctx);
+
+	T visitLor(L1Parser.LorContext ctx);
 
 	T visitLparamsvalue(L1Parser.LparamsvalueContext ctx);
 
@@ -35,9 +40,9 @@ public interface L1Visitor<T> extends ParseTreeVisitor<T> {
 
 	T visitLmuldiv(L1Parser.LmuldivContext ctx);
 
-	T visitLexpr(L1Parser.LexprContext ctx);
-
 	T visitLbooleannagative(L1Parser.LbooleannagativeContext ctx);
+
+	T visitLexpr(L1Parser.LexprContext ctx);
 
 	T visitLtrue(L1Parser.LtrueContext ctx);
 
