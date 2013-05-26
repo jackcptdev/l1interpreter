@@ -28,6 +28,7 @@ b : '{' (NL | b | stat )* '}'                       #lblock
         ;
 
 stat: 'if' e 'then' b ('else' b)?                   #lifstat
+    | 'while' e b                                     #lwhile
     | e '=' e ';'                                   #lassignstat
     | e ';'                                         #ldemaexpr
     | 'return' e ';'                                #lreturn
@@ -56,7 +57,7 @@ e :   TRUE                                          #ltrue
      | '(' e ')'                                    #lcoma
     ;
 
-
+WHILE: 'while';
 PRINT : 'print';
 RETURN : 'return';
 TRUE : 'true';
