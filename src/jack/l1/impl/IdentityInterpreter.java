@@ -33,6 +33,7 @@ import jack.l1.L1Parser.LreturnContext;
 import jack.l1.L1Parser.LstringContext;
 import jack.l1.L1Parser.LsubAddContext;
 import jack.l1.L1Parser.LtrueContext;
+import jack.l1.L1Parser.LwhileContext;
 import jack.l1.L1Parser.ParametersContext;
 import jack.l1.mem.ScopeManager;
 
@@ -399,6 +400,21 @@ public class IdentityInterpreter extends L1BaseVisitor<Identity> {
 			ans = true;
 		}
 		return new Identity(Identity.BOOL, ans);
+	}
+
+	@Override
+	public Identity visitLwhile(LwhileContext ctx) {
+		while (true) {
+			Identity condition = visit(ctx.e());
+			Boolean b = Boolean
+					.valueOf(condition.getConstantValue().toString());
+			if (b) {
+				visit(ctx.b());
+			} else {
+				break;
+			}
+		}
+		return null;
 	}
 
 }

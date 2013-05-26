@@ -22,6 +22,8 @@ public interface L1Visitor<T> extends ParseTreeVisitor<T> {
 
 	T visitParameters(L1Parser.ParametersContext ctx);
 
+	T visitLwhile(L1Parser.LwhileContext ctx);
+
 	T visitLor(L1Parser.LorContext ctx);
 
 	T visitLparamsvalue(L1Parser.LparamsvalueContext ctx);
@@ -40,9 +42,9 @@ public interface L1Visitor<T> extends ParseTreeVisitor<T> {
 
 	T visitLmuldiv(L1Parser.LmuldivContext ctx);
 
-	T visitLbooleannagative(L1Parser.LbooleannagativeContext ctx);
-
 	T visitLexpr(L1Parser.LexprContext ctx);
+
+	T visitLbooleannagative(L1Parser.LbooleannagativeContext ctx);
 
 	T visitLtrue(L1Parser.LtrueContext ctx);
 

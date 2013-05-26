@@ -23,6 +23,8 @@ public class L1BaseVisitor<T> extends AbstractParseTreeVisitor<T> implements L1V
 
 	@Override public T visitParameters(L1Parser.ParametersContext ctx) { return visitChildren(ctx); }
 
+	@Override public T visitLwhile(L1Parser.LwhileContext ctx) { return visitChildren(ctx); }
+
 	@Override public T visitLor(L1Parser.LorContext ctx) { return visitChildren(ctx); }
 
 	@Override public T visitLparamsvalue(L1Parser.LparamsvalueContext ctx) { return visitChildren(ctx); }
@@ -41,9 +43,9 @@ public class L1BaseVisitor<T> extends AbstractParseTreeVisitor<T> implements L1V
 
 	@Override public T visitLmuldiv(L1Parser.LmuldivContext ctx) { return visitChildren(ctx); }
 
-	@Override public T visitLbooleannagative(L1Parser.LbooleannagativeContext ctx) { return visitChildren(ctx); }
-
 	@Override public T visitLexpr(L1Parser.LexprContext ctx) { return visitChildren(ctx); }
+
+	@Override public T visitLbooleannagative(L1Parser.LbooleannagativeContext ctx) { return visitChildren(ctx); }
 
 	@Override public T visitLtrue(L1Parser.LtrueContext ctx) { return visitChildren(ctx); }
 
